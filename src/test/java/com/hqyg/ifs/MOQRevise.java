@@ -9,7 +9,7 @@ public class MOQRevise {
 
 
     public static void main(String[] args) {
-        Map<String, SkuStoryQuantity> skuStoryQuantityMap = new HashMap<>();
+        Map<String, SkuStoryQuantity> skuStoryQuantityMap = new HashMap<String, SkuStoryQuantity>();
         ArrayList<String> skuList = new ArrayList<>();
         skuStoryQuantityMap = getTestDatas();
 
@@ -32,7 +32,7 @@ public class MOQRevise {
         int allAQuantity = 0;
         //整款色7天销量N
         int allWeekSales = 0;
-        //遍历skuStoryQuantityMap获取总7天销售量
+        //遍历skuStoryQuantityMap获取以上数据
         for (Map.Entry<String, SkuStoryQuantity> entry : skuStoryQuantityMap.entrySet()) {
             allMOQ += entry.getValue().getMOQ();
             if (entry.getValue().getStockQuantity() > entry.getValue().getOrderQuantity()) {
@@ -66,7 +66,7 @@ public class MOQRevise {
     /**
      * 从excel获取初始数据
      *
-     * @return
+     * @return SkuStoryQuantity对象
      */
 
     public static Map<String, SkuStoryQuantity> getTestDatas() {
