@@ -4,9 +4,9 @@ import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 public class ExcelUtil {
 
@@ -19,7 +19,7 @@ public class ExcelUtil {
      * @param endRowStr     结束行
      * @param startCellStr  开始列，1开始
      * @param endCellStr    结束列
-     * @return
+     * @return data对象
      */
     public static Object[][] readExcel(String excelPath, String sheetIndexStr, String startRowStr, String endRowStr,
                                        String startCellStr, String endCellStr) {
@@ -36,7 +36,7 @@ public class ExcelUtil {
     public static Object[][] readExcel(String excelPath, int sheetIndex, int startRow, int endRow, int startCell,
                                        int endCell) {
         Object[][] datas = new Object[endRow - startRow + 1][endCell - startCell + 1];
-        Workbook workbook = null;
+        Workbook workbook;
         InputStream is = ExcelUtil.class.getResourceAsStream(excelPath);
         try {
             workbook = WorkbookFactory.create(is);
@@ -50,19 +50,59 @@ public class ExcelUtil {
                     datas[i - startRow][j - startCell] = cellValue;
                 }
             }
-        } catch (EncryptedDocumentException e) {
+        } catch (EncryptedDocumentException | InvalidFormatException | IOException e) {
             e.printStackTrace();
-        } catch (InvalidFormatException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        }
+        return datas;
+    }
+
+    /**
+     * @param excelPath     文件存放绝对路径
+     * @param sheetIndexStr sheet下标，0开始
+     * @param startRowStr   开始行，1开始
+     * @param endRowStr     结束行
+     * @param startCellStr  开始列，1开始
+     * @param endCellStr    结束列
+     * @return data数据对象
+     */
+
+    public static Object[][] readExcelLocal(String excelPath, String sheetIndexStr, String startRowStr, String endRowStr,
+                                            String startCellStr, String endCellStr) {
+
+        int sheetIndex = Integer.parseInt(sheetIndexStr);
+        int startRow = Integer.parseInt(startRowStr);
+        int endRow = Integer.parseInt(endRowStr);
+        int startCell = Integer.parseInt(startCellStr);
+        int endCell = Integer.parseInt(endCellStr);
+
+        return readExcelLocal(excelPath, sheetIndex, startRow, endRow, startCell, endCell);
+    }
+
+    public static Object[][] readExcelLocal(String excelPath, int sheetIndex, int startRow, int endRow, int startCell,
+                                            int endCell) {
+        Object[][] datas = new Object[endRow - startRow + 1][endCell - startCell + 1];
+        try {
+            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(new File(excelPath)));
+            XSSFWorkbook xssfWorkbook = new XSSFWorkbook(bis);
+            Sheet sheet = xssfWorkbook.getSheetAt(sheetIndex);
+            for (int i = startRow; i <= endRow; i++) {
+                Row row = sheet.getRow(i - 1);
+                for (int j = startCell; j <= endCell; j++) {
+                    Cell cell = row.getCell(j - 1, MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                    cell.setCellType(CellType.STRING);
+                    String cellValue = cell.getStringCellValue();
+                    datas[i - startRow][j - startCell] = cellValue;
+                }
+            }
+        } catch (EncryptedDocumentException | IOException e) {
             e.printStackTrace();
         }
         return datas;
     }
 
     public static void main(String[] args) {
-        String path = "/数据准备.xlsx";
-        Object[][] datas = ExcelUtil.readExcel(path, "0", "2", "7", "2", "9");
+        String path = "C:\\Users\\Administrator\\Desktop\\ifs\\IFS2379\\数据准备.xlsx";
+        Object[][] datas = ExcelUtil.readExcelLocal(path, "0", "2", "7", "2", "9");
         for (Object[] objects : datas) {
             for (Object object : objects) {
                 System.out.print("[" + object.toString() + "]");

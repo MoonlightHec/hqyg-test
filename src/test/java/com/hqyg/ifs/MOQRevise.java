@@ -2,6 +2,7 @@ package com.hqyg.ifs;
 
 import com.hqyg.util.ExcelUtil;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 
@@ -9,20 +10,13 @@ public class MOQRevise {
 
 
     public static void main(String[] args) {
-        Map<String, SkuStoryQuantity> skuStoryQuantityMap = new HashMap<String, SkuStoryQuantity>();
-        ArrayList<String> skuList = new ArrayList<>();
+        Map<String, SkuStoryQuantity> skuStoryQuantityMap;
         skuStoryQuantityMap = getTestDatas();
 
         //获取所有sku集合
-        for (String key : skuStoryQuantityMap.keySet()) {
-            skuList.add(key);
-        }
+        ArrayList<String> skuList = new ArrayList<>(skuStoryQuantityMap.keySet());
         //将sku从小到大排序
         Collections.sort(skuList);
-
-        //进行第一次分摊
-        //计算销量占比
-
 
         //整款色最小起订量M
         int allMOQ = 0;
@@ -32,6 +26,15 @@ public class MOQRevise {
         int allAQuantity = 0;
         //整款色7天销量N
         int allWeekSales = 0;
+
+
+        //再次摊分所需数据
+        //需再次分摊数量float
+        float needSecondQtyF = 0;
+        //需再次分摊的sku
+        ArrayList<String> needCutSkuList = new ArrayList<>();
+
+
         //遍历skuStoryQuantityMap获取以上数据
         for (Map.Entry<String, SkuStoryQuantity> entry : skuStoryQuantityMap.entrySet()) {
             allMOQ += entry.getValue().getMOQ();
@@ -43,23 +46,48 @@ public class MOQRevise {
         }
         System.out.println("【M:" + allMOQ + "】【A:" + allStockQuantity + "】【Q:" + allAQuantity + "】【N:" + allWeekSales + "】");
 
-        //获得每个sku的7天销量占比
-        System.out.println("----------------每个sku的7天销量占比-----------------");
+
+        int X = allMOQ + allStockQuantity - allAQuantity;
+        System.out.println("----------------第一次分摊-----------------");
         for (Map.Entry<String, SkuStoryQuantity> entry : skuStoryQuantityMap.entrySet()) {
-            ArrayList<Float> SalesTempList = new ArrayList<>();
-            SalesTempList.add(((float) entry.getValue().getWeekSales() / allWeekSales));
-            entry.getValue().setSalesProportionList(SalesTempList);
-            System.out.println(SalesTempList);
+            float n1 = (float) entry.getValue().getWeekSales() / allWeekSales;
+
+            int realStockQuantity = Math.max((entry.getValue().getStockQuantity() - entry.getValue().getOrderQuantity()), 0);
+            float firstCut = X * n1 - realStockQuantity - entry.getValue().getBStoryQuantity() - entry.getValue().getCStoryQuantity();
+            System.out.println(entry.getValue().getSku() + "第一次分摊结果：" + firstCut + "，销量占比:" + n1);
+            //保存第一次分摊结果
+            entry.getValue().setFirstCutQuantity(firstCut);
+
+            //第二次分摊需要的数据
+            if (firstCut < 0) {
+                needSecondQtyF += firstCut;
+            } else {
+                needCutSkuList.add(entry.getValue().getSku());
+            }
         }
 
 
-        for (Map.Entry<String, SkuStoryQuantity> entry : skuStoryQuantityMap.entrySet()) {
-            ArrayList<Float> SalesTempList = entry.getValue().getSalesProportionList();
-            for (Float sales : SalesTempList) {
-                if (sales <= 0) {
+        float needAgainQty = Math.abs(needSecondQtyF);
+        int needCutWeekSales = 0;
+        for (String needCutSku : needCutSkuList) {
+            needCutWeekSales += skuStoryQuantityMap.get(needCutSku).getWeekSales();
+        }
+        System.out.println("----------------第二次分摊-----------------");
+        for (String needCutSku : needCutSkuList) {
+            float n2 = (float) skuStoryQuantityMap.get(needCutSku).getWeekSales() / needCutWeekSales;
+            float againCut = needAgainQty * n2;
+            System.out.println(skuStoryQuantityMap.get(needCutSku).getSku() + "第二次分摊结果：" + againCut + "，销量占比：" + n2);
+            float finalQuantityTemp = skuStoryQuantityMap.get(needCutSku).getFirstCutQuantity() - againCut;
+            skuStoryQuantityMap.get(needCutSku).setFinalQuantity((int) Math.ceil(finalQuantityTemp));
+        }
 
-                }
+        System.out.println("----------------最终分摊结果-----------------");
+        for (String sku : skuList) {
+            if (skuStoryQuantityMap.get(sku).getFirstCutQuantity() < 0) {
+                skuStoryQuantityMap.get(sku).setFinalQuantity(0);
             }
+            int finalCQty = skuStoryQuantityMap.get(sku).getCStoryQuantity() + skuStoryQuantityMap.get(sku).getFinalQuantity();
+            System.out.println(skuStoryQuantityMap.get(sku).getSku() + "最终分摊数量：" + skuStoryQuantityMap.get(sku).getFinalQuantity() + "，需求C数量：" + finalCQty);
         }
     }
 
@@ -90,36 +118,37 @@ public class MOQRevise {
         Map<String, SkuStoryQuantity> skuTestDatasMap = new HashMap<>();
 
         //获取excel数据
-        String path = "/数据准备.xlsx";
-        Object[][] datas = ExcelUtil.readExcel(path, "0", "2", "7", "2", "9");
+        // String path = "/数据准备.xlsx";
+        String path = "C:\\Users\\Administrator\\Desktop\\ifs\\IFS2379\\数据准备.xlsx";
+        Object[][] datas = ExcelUtil.readExcelLocal(path, "0", "2", "7", "2", "9");
 
         //将数据装进map
-        for (int i = 0; i < datas.length; i++) {
-            for (int j = 0; j < datas[i].length; j++) {
+        for (Object[] data : datas) {
+            for (int j = 0; j < data.length; j++) {
                 switch (j) {
                     case 0:
-                        sku = datas[i][j].toString();
+                        sku = data[j].toString();
                         break;
                     case 1:
-                        aStoryQuantity = Integer.parseInt(datas[i][j].toString());
+                        aStoryQuantity = Integer.parseInt(data[j].toString());
                         break;
                     case 2:
-                        bStoryQuantity = Integer.parseInt(datas[i][j].toString());
+                        bStoryQuantity = Integer.parseInt(data[j].toString());
                         break;
                     case 3:
-                        cStoryQuantity = Integer.parseInt(datas[i][j].toString());
+                        cStoryQuantity = Integer.parseInt(data[j].toString());
                         break;
                     case 4:
-                        MOQ = Integer.parseInt(datas[i][j].toString());
+                        MOQ = Integer.parseInt(data[j].toString());
                         break;
                     case 5:
-                        stockQuantity = Integer.parseInt(datas[i][j].toString());
+                        stockQuantity = Integer.parseInt(data[j].toString());
                         break;
                     case 6:
-                        orderQuantity = Integer.parseInt(datas[i][j].toString());
+                        orderQuantity = Integer.parseInt(data[j].toString());
                         break;
                     case 7:
-                        weekSales = Integer.parseInt(datas[i][j].toString());
+                        weekSales = Integer.parseInt(data[j].toString());
                         break;
                 }
             }

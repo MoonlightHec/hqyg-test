@@ -12,11 +12,8 @@ public class SkuStoryQuantity {
     private int orderQuantity;
     private int weekSales;
     private int finalQuantity;
+    private float firstCutQuantity;
 
-    //销量占比
-    private ArrayList<Float> salesProportionList;
-    //分摊数量
-    private ArrayList<Integer> cutQuantityList;
 
     public String getSku() {
         return sku;
@@ -90,19 +87,11 @@ public class SkuStoryQuantity {
         this.finalQuantity = finalQuantity;
     }
 
-    public ArrayList<Float> getSalesProportionList() {
-        return salesProportionList;
+    public float getFirstCutQuantity() {
+        return firstCutQuantity;
     }
 
-    public void setSalesProportionList(ArrayList<Float> salesProportionList) {
-        this.salesProportionList = salesProportionList;
-    }
-
-    public ArrayList<Integer> getCutQuantityList() {
-        return cutQuantityList;
-    }
-
-    public void setCutQuantityList(ArrayList<Integer> cutQuantityList) {
-        this.cutQuantityList = cutQuantityList;
+    public void setFirstCutQuantity(float firstCutQuantity) {
+        this.firstCutQuantity = firstCutQuantity;
     }
 }
