@@ -26,6 +26,6 @@ public class sampleUtil {
 
     public static void main(String[] args) {
         String sku = "202040000";
-        sampleParams(sku, 10000);
+        sampleParams(sku, 10);
     }
 }

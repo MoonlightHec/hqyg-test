@@ -5,13 +5,18 @@ import com.hqyg.util.ExcelUtil;
 import java.lang.reflect.Array;
 import java.util.*;
 
+/**
+ * @author 作者 lijun:
+ * @version 创建时间：2020年6月28日 20:22:36
+ * 类说明
+ */
 
 public class MOQRevise {
 
+    private static int times = 1;
 
     public static void main(String[] args) {
-        Map<String, SkuStoryQuantity> skuStoryQuantityMap;
-        skuStoryQuantityMap = getTestDatas();
+        Map<String, SkuStoryQuantity> skuStoryQuantityMap = getTestDatas();
 
         //获取所有sku集合
         ArrayList<String> skuList = new ArrayList<>(skuStoryQuantityMap.keySet());
@@ -29,9 +34,9 @@ public class MOQRevise {
 
 
         //再次摊分所需数据
-        //需再次分摊数量float
+        //需第二次分摊数量needSecondQtyF
         float needSecondQtyF = 0;
-        //需再次分摊的sku
+        //需第二次分摊的sku
         ArrayList<String> needCutSkuList = new ArrayList<>();
 
 
@@ -48,7 +53,7 @@ public class MOQRevise {
 
 
         int X = allMOQ + allStockQuantity - allAQuantity;
-        System.out.println("----------------第一次分摊-----------------");
+        System.out.println("----------------第1次分摊-----------------");
         for (Map.Entry<String, SkuStoryQuantity> entry : skuStoryQuantityMap.entrySet()) {
             float n1 = (float) entry.getValue().getWeekSales() / allWeekSales;
 
@@ -66,25 +71,18 @@ public class MOQRevise {
             }
         }
 
+        //第N次分摊
+        if (0 != needSecondQtyF) {
+            againCut(needSecondQtyF, needCutSkuList, skuStoryQuantityMap);
+        }
 
-        float needAgainQty = Math.abs(needSecondQtyF);
-        int needCutWeekSales = 0;
-        for (String needCutSku : needCutSkuList) {
-            needCutWeekSales += skuStoryQuantityMap.get(needCutSku).getWeekSales();
-        }
-        System.out.println("----------------第二次分摊-----------------");
-        for (String needCutSku : needCutSkuList) {
-            float n2 = (float) skuStoryQuantityMap.get(needCutSku).getWeekSales() / needCutWeekSales;
-            float againCut = needAgainQty * n2;
-            System.out.println(skuStoryQuantityMap.get(needCutSku).getSku() + "第二次分摊结果：" + againCut + "，销量占比：" + n2);
-            float finalQuantityTemp = skuStoryQuantityMap.get(needCutSku).getFirstCutQuantity() - againCut;
-            skuStoryQuantityMap.get(needCutSku).setFinalQuantity((int) Math.ceil(finalQuantityTemp));
-        }
 
         System.out.println("----------------最终分摊结果-----------------");
         for (String sku : skuList) {
             if (skuStoryQuantityMap.get(sku).getFirstCutQuantity() < 0) {
                 skuStoryQuantityMap.get(sku).setFinalQuantity(0);
+            } else {
+                skuStoryQuantityMap.get(sku).setFinalQuantity((int) skuStoryQuantityMap.get(sku).getFirstCutQuantity());
             }
             int finalCQty = skuStoryQuantityMap.get(sku).getCStoryQuantity() + skuStoryQuantityMap.get(sku).getFinalQuantity();
             System.out.println(skuStoryQuantityMap.get(sku).getSku() + "最终分摊数量：" + skuStoryQuantityMap.get(sku).getFinalQuantity() + "，需求C数量：" + finalCQty);
@@ -119,7 +117,7 @@ public class MOQRevise {
 
         //获取excel数据
         // String path = "/数据准备.xlsx";
-        String path = "C:\\Users\\Administrator\\Desktop\\ifs\\IFS2379\\数据准备.xlsx";
+        String path = "C:\\Users\\Administrator\\Desktop\\ifs\\IFS-2379\\数据准备.xlsx";
         Object[][] datas = ExcelUtil.readExcelLocal(path, "0", "2", "7", "2", "9");
 
         //将数据装进map
@@ -164,5 +162,35 @@ public class MOQRevise {
             skuTestDatasMap.put(sku, skuStoryQuantity);
         }
         return skuTestDatasMap;
+    }
+
+    private static void againCut(Float needSecondQtyF, ArrayList<String> needCutSkuList, Map<String, SkuStoryQuantity> skuStoryQuantityMap) {
+
+        times++;
+        float needAgainQty = Math.abs(needSecondQtyF);
+        int needCutWeekSales = 0;
+        for (String needCutSku : needCutSkuList) {
+            needCutWeekSales += skuStoryQuantityMap.get(needCutSku).getWeekSales();
+        }
+
+        System.out.println("----------------第" + times + "次分摊-----------------");
+        System.out.println("第" + times + "次分摊总数：" + needAgainQty);
+        float needAgainCutQty = 0;
+        ArrayList<String> needAgainCutSkuList = new ArrayList<>();
+        for (String needCutSku : needCutSkuList) {
+            float n = (float) skuStoryQuantityMap.get(needCutSku).getWeekSales() / needCutWeekSales;
+            float againCut = needAgainQty * n;
+            System.out.println(skuStoryQuantityMap.get(needCutSku).getSku() + "第二次分摊数量：" + againCut + "，销量占比：" + n);
+            float finalQuantityTemp = skuStoryQuantityMap.get(needCutSku).getFirstCutQuantity() - againCut;
+            skuStoryQuantityMap.get(needCutSku).setFirstCutQuantity((int) Math.ceil(finalQuantityTemp));
+            if (finalQuantityTemp < 0) {
+                needAgainCutQty += finalQuantityTemp;
+            } else {
+                needAgainCutSkuList.add(needCutSku);
+            }
+        }
+        if (0 != needAgainCutQty) {
+            againCut(needAgainCutQty, needAgainCutSkuList, skuStoryQuantityMap);
+        }
     }
 }

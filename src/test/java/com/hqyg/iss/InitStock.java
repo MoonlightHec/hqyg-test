@@ -41,7 +41,7 @@ public class InitStock extends PublicMethod {
             String sign = SignUtils.sign(signParams, appSecret);
             String params = "?sign=" + sign + "&appKey=" + appKey + "&timestamp=" + URLEncoder.encode(timeStamp) + "&sku=" + sku + "&skuName=" + skuName;
             String requestUrl = domain + "/tool/test/addSku" + params;
-            String response = sendGet(requestUrl);
+            sendGet(requestUrl);
 
         }
         System.out.println("执行成功");
@@ -62,6 +62,7 @@ public class InitStock extends PublicMethod {
         String sign = SignUtils.sign(signParams, appSecret);
         String params = "?sign=" + sign + "&appKey=" + appKey + "&timestamp=" + URLEncoder.encode(timeStamp) + "&sku=" + sku + "&skuName=" + skuName;
         String requestUrl = domain + "/tool/test/addSku" + params;
+        sendGet(requestUrl);
     }
 
 

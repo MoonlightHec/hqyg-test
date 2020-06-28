@@ -2,6 +2,12 @@ package com.hqyg.ifs;
 
 import java.util.ArrayList;
 
+/**
+ * @author 作者 lijun:
+ * @version 创建时间：2020年6月28日 20:22:36
+ * 类说明
+ */
+
 public class SkuStoryQuantity {
     private String sku;
     private int aStoryQuantity;

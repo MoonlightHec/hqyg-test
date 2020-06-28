@@ -11,13 +11,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+
+/**
+ * @author lijun
+ */
 public class ShardStock extends InitStock {
 
 
     @Test
     public void addOneSku() {
 
-        String sku = "100010101";
+        String sku = "2020062302";
         //添加sku
         addThisSku(sku);
 
