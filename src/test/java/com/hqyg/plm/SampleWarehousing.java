@@ -2,13 +2,13 @@ package com.hqyg.plm;
 
 import java.util.ArrayList;
 
-public class sampleUtil {
+public class SampleWarehousing {
 
     /**
      * 生成样品管理入库登记入参json
      *
-     * @param sku
-     * @param num
+     * @param sku 入样sku
+     * @param num 入样sku个数
      */
     public static void sampleParams(String sku, int num) {
         String jsonPart1 = "{\"sampleNum\":\"";

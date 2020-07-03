@@ -31,7 +31,8 @@ public class MOQRevise {
         int allAQuantity = 0;
         //整款色7天销量N
         int allWeekSales = 0;
-
+        //需求总数Z
+        int allStoryQty = 0;
 
         //再次摊分所需数据
         //需第二次分摊数量needSecondQtyF
@@ -48,44 +49,49 @@ public class MOQRevise {
             }
             allAQuantity += entry.getValue().getAStoryQuantity();
             allWeekSales += entry.getValue().getWeekSales();
+            allStoryQty += entry.getValue().getAStoryQuantity();
+            allStoryQty += entry.getValue().getBStoryQuantity();
+            allStoryQty += entry.getValue().getCStoryQuantity();
         }
         System.out.println("【M:" + allMOQ + "】【A:" + allStockQuantity + "】【Q:" + allAQuantity + "】【N:" + allWeekSales + "】");
+        if (0.3f >= ((float) allStoryQty / allMOQ) || allStoryQty > allMOQ) {
+            System.out.println("总需求数量:" + allStoryQty + ";最小起订量：" + allMOQ + ";【" + allStoryQty + "/" + allMOQ + "=" + (float) allStoryQty / allMOQ + "】不满足分摊规则，不分摊!");
+        } else {
+            int X = allMOQ + allStockQuantity - allAQuantity;
+            System.out.println("----------------第1次分摊-----------------");
+            for (Map.Entry<String, SkuStoryQuantity> entry : skuStoryQuantityMap.entrySet()) {
+                float n1 = (float) entry.getValue().getWeekSales() / allWeekSales;
 
+                int realStockQuantity = Math.max((entry.getValue().getStockQuantity() - entry.getValue().getOrderQuantity()), 0);
+                float firstCut = X * n1 - realStockQuantity - entry.getValue().getBStoryQuantity() - entry.getValue().getCStoryQuantity();
+                System.out.println(entry.getValue().getSku() + "第"+times+"次分摊结果：" + firstCut + "，销量占比:" + n1);
+                //保存第一次分摊结果
+                entry.getValue().setFirstCutQuantity(firstCut);
 
-        int X = allMOQ + allStockQuantity - allAQuantity;
-        System.out.println("----------------第1次分摊-----------------");
-        for (Map.Entry<String, SkuStoryQuantity> entry : skuStoryQuantityMap.entrySet()) {
-            float n1 = (float) entry.getValue().getWeekSales() / allWeekSales;
-
-            int realStockQuantity = Math.max((entry.getValue().getStockQuantity() - entry.getValue().getOrderQuantity()), 0);
-            float firstCut = X * n1 - realStockQuantity - entry.getValue().getBStoryQuantity() - entry.getValue().getCStoryQuantity();
-            System.out.println(entry.getValue().getSku() + "第一次分摊结果：" + firstCut + "，销量占比:" + n1);
-            //保存第一次分摊结果
-            entry.getValue().setFirstCutQuantity(firstCut);
-
-            //第二次分摊需要的数据
-            if (firstCut < 0) {
-                needSecondQtyF += firstCut;
-            } else {
-                needCutSkuList.add(entry.getValue().getSku());
+                //第二次分摊需要的数据
+                if (firstCut < 0) {
+                    needSecondQtyF += firstCut;
+                } else {
+                    needCutSkuList.add(entry.getValue().getSku());
+                }
             }
-        }
 
-        //第N次分摊
-        if (0 != needSecondQtyF) {
-            againCut(needSecondQtyF, needCutSkuList, skuStoryQuantityMap);
-        }
-
-
-        System.out.println("----------------最终分摊结果-----------------");
-        for (String sku : skuList) {
-            if (skuStoryQuantityMap.get(sku).getFirstCutQuantity() < 0) {
-                skuStoryQuantityMap.get(sku).setFinalQuantity(0);
-            } else {
-                skuStoryQuantityMap.get(sku).setFinalQuantity((int) skuStoryQuantityMap.get(sku).getFirstCutQuantity());
+            //第N次分摊
+            if (0 != needSecondQtyF) {
+                againCut(needSecondQtyF, needCutSkuList, skuStoryQuantityMap);
             }
-            int finalCQty = skuStoryQuantityMap.get(sku).getCStoryQuantity() + skuStoryQuantityMap.get(sku).getFinalQuantity();
-            System.out.println(skuStoryQuantityMap.get(sku).getSku() + "最终分摊数量：" + skuStoryQuantityMap.get(sku).getFinalQuantity() + "，需求C数量：" + finalCQty);
+
+
+            System.out.println("----------------最终分摊结果-----------------");
+            for (String sku : skuList) {
+                if (skuStoryQuantityMap.get(sku).getFirstCutQuantity() < 0) {
+                    skuStoryQuantityMap.get(sku).setFinalQuantity(0);
+                } else {
+                    skuStoryQuantityMap.get(sku).setFinalQuantity((int) Math.ceil(skuStoryQuantityMap.get(sku).getFirstCutQuantity()));
+                }
+                int finalCQty = skuStoryQuantityMap.get(sku).getCStoryQuantity() + skuStoryQuantityMap.get(sku).getFinalQuantity();
+                System.out.println(skuStoryQuantityMap.get(sku).getSku() + "最终分摊数量：" + skuStoryQuantityMap.get(sku).getFinalQuantity() + "，需求C数量：" + finalCQty);
+            }
         }
     }
 
@@ -180,7 +186,7 @@ public class MOQRevise {
         for (String needCutSku : needCutSkuList) {
             float n = (float) skuStoryQuantityMap.get(needCutSku).getWeekSales() / needCutWeekSales;
             float againCut = needAgainQty * n;
-            System.out.println(skuStoryQuantityMap.get(needCutSku).getSku() + "第二次分摊数量：" + againCut + "，销量占比：" + n);
+            System.out.println(skuStoryQuantityMap.get(needCutSku).getSku() + "第" + times + "次分摊数量：" + againCut + "，销量占比：" + n);
             float finalQuantityTemp = skuStoryQuantityMap.get(needCutSku).getFirstCutQuantity() - againCut;
             skuStoryQuantityMap.get(needCutSku).setFirstCutQuantity((int) Math.ceil(finalQuantityTemp));
             if (finalQuantityTemp < 0) {
