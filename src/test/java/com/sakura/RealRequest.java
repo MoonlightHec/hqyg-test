@@ -4,7 +4,9 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -165,7 +167,6 @@ public class RealRequest {
      */
     public static String getPostBodyType(Map<String, String> paramsMap, String jsonStr) {
         if (paramsMap != null) {
-            //不知为什么这儿总是报错。目前暂不设置(20170424)
             return "text/plain";
         } else
             return "application/json;charset=utf-8";
