@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class GetPMSProvider {
 
-    private static final String TOKEN = "5226B1A207C54A60B716505C4ECEA227";
+    private static final String TOKEN = "789B39D89604450CAAA48B126991DFB7";
 
     @Test
     public void getProviderCon() {
