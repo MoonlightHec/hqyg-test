@@ -25,7 +25,9 @@ public class RealRequest {
             conn = getHttpURLConnection(requestURL, "GET");
             conn.setDoInput(true);
             if (headerMap != null) {
-                setHeader(conn, headerMap);
+                for (String key : headerMap.keySet()) {
+                    conn.setRequestProperty(key, headerMap.get(key));
+                }
             }
             conn.connect();
             return getRealResponse(conn);
@@ -47,7 +49,10 @@ public class RealRequest {
             conn.setRequestProperty("Content-Type", bodyType);
 
             if (headerMap != null) {
-                setHeader(conn, headerMap);//请求头必须放在conn.connect()之前
+                //设置请求头，请求头必须放在conn.connect()之前
+                for (String key : headerMap.keySet()) {
+                    conn.setRequestProperty(key, headerMap.get(key));
+                }
             }
             conn.connect();// 连接，以上所有的请求配置必须在这个API调用之前
 
@@ -75,16 +80,6 @@ public class RealRequest {
         return conn;
     }
 
-    /**
-     * 设置请求头
-     */
-    public void setHeader(HttpURLConnection conn, Map<String, String> headerMap) {
-        if (headerMap != null) {
-            for (String key : headerMap.keySet()) {
-                conn.setRequestProperty(key, headerMap.get(key));
-            }
-        }
-    }
 
     /**
      * 当正常返回时，得到Response对象
@@ -168,7 +163,9 @@ public class RealRequest {
     public static String getPostBodyType(Map<String, String> paramsMap, String jsonStr) {
         if (paramsMap != null) {
             return "text/plain";
-        } else
+        } else if (jsonStr != null) {
             return "application/json;charset=utf-8";
+        }
+        return null;
     }
 }

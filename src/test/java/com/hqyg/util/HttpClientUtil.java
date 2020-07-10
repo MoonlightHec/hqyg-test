@@ -22,7 +22,7 @@ import org.apache.http.message.BasicNameValuePair;
  *
  * @author Administrator<br>
  */
-public class HttpUtil {
+public class HttpClientUtil {
 
     /**
      * post请求
