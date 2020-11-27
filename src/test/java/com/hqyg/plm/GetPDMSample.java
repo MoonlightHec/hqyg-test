@@ -20,9 +20,8 @@ public class GetPDMSample {
         String interfaceStr = "http://pdm.hqygou.com/interface/sample-generate/get-sample-by-sku";
         String requestBody = "{\"goods_sn\":\"206076401\",\"signature\":\"018f4bea4297618dda3ebabb39bc0f12\",\"timestamp\":1594030158}";
 
-        Map<String, String> headerMap = new HashMap<>();
 
-        RealResponse response = UrlHttpUtil.urlHttpPost(interfaceStr, requestBody, headerMap);
+        RealResponse response = UrlHttpUtil.urlHttpPost(interfaceStr, requestBody);
         System.out.println(response.is2String(response.getInputStream()));
     }
 

@@ -40,9 +40,9 @@ public class SignUtil {
         }).join();
 
         paramStr += "secret12345678";
-        logger.info(paramStr);
+        //logger.info(paramStr);
         String sign = DigestUtils.md5Hex(paramStr);
-        logger.info(sign);
+        //logger.info(sign);
         return sign;
     }
 
@@ -53,7 +53,7 @@ public class SignUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println(DigestUtils.md5Hex("475072702"));
+        System.out.println(DigestUtils.md5Hex("777777777"));
     }
 
 }

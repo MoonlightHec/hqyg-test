@@ -84,7 +84,7 @@ public class UrlHttpUtil extends RealRequest {
     }
 
     /**
-     * post请求，键值对参数
+     * post请求，键值对参数,不带请求头
      *
      * @param url：url
      * @param jsonStr：json格式字符串参数
