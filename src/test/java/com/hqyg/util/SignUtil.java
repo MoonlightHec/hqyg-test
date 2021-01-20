@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class SignUtil {
@@ -53,7 +55,35 @@ public class SignUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println(DigestUtils.md5Hex("777777777"));
+        System.out.println(DigestUtils.md5Hex("afasf*^d#&^h213sa152{\"provider_sn\":\"OEM0047\",\"sku\":\"206015610\"}"));
+        System.out.println(MyMD5("afasf*^d#&^h213sa152{\"provider_sn\":\"OEM0047\",\"sku\":\"206015610\"}\n"));
+    }
+
+    /**
+     * MD5加密
+     * @param str 原数据
+     * @return 加密数据
+     */
+    public static String MyMD5(String str) {
+        StringBuffer buf = new StringBuffer("");
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(str.getBytes());
+            byte b[] = md.digest();
+
+            int i;
+            for (int offset = 0; offset < b.length; offset++) {
+                i = b[offset];
+                if (i < 0) i += 256;
+                if (i < 16)
+                    buf.append("0");
+                buf.append(Integer.toHexString(i));
+            }
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return buf.toString();
     }
 
 }

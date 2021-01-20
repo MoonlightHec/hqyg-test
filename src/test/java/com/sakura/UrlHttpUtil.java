@@ -3,7 +3,9 @@ package com.sakura;
 import java.util.Map;
 
 /**
- * Created by River on 2020/7/2
+ * @Author lijun
+ * @Date 2020年7月2日 17:05:01
+ * @Description //TODO
  */
 
 public class UrlHttpUtil extends RealRequest {
@@ -63,7 +65,7 @@ public class UrlHttpUtil extends RealRequest {
     }
 
     /**
-     * post请求，可以传递参数
+     * post请求，键值对参数，不带请求头
      *
      * @param url：url
      * @param paramsMap：map集合，封装键值对参数
@@ -84,7 +86,7 @@ public class UrlHttpUtil extends RealRequest {
     }
 
     /**
-     * post请求，键值对参数,不带请求头
+     * post请求，json参数,不带请求头
      *
      * @param url：url
      * @param jsonStr：json格式字符串参数

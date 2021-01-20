@@ -1,16 +1,23 @@
 package com.sakura;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * jmeter临时测试类
+ */
 
 public class Tester {
 
+    private static final Logger logger = Logger.getLogger(Tester.class);
+
     public static void main(String[] args) {
-        String interfaceStr = "http://plm.hqygou.com:8088/sample/develop/pms/suppliers/query";
-        String requestBody = "{\"providerName\": \"锴慧通讯\"}";
-        Map<String, String> headerMap = new HashMap<>();
-        headerMap.put("PLM-TOKEN", "5226B1A207C54A60B716505C4ECEA227");
-        RealResponse response = UrlHttpUtil.urlHttpPost(interfaceStr, requestBody, headerMap);
-        System.out.println(response.is2String(response.getInputStream()));
+
+        int a = 100;
+//        String s = a.toString();
+
     }
+
 }

@@ -5,8 +5,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
- * Created by River on 2020/7/2
+ * @Author lijun
+ * @Date 2020年7月2日 17:05:01
+ * @Description //TODO
  */
+
 public class RealResponse {
     private InputStream inputStream;
     private InputStream errorStream;
