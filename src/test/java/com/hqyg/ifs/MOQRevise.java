@@ -5,12 +5,12 @@ import com.hqyg.util.ExcelUtil;
 import java.lang.reflect.Array;
 import java.util.*;
 
-/**
- * @author 作者 lijun:
- * @version 创建时间：2020年6月28日 20:22:36
- * 类说明
- */
 
+/**
+ * @Author lijun
+ * @Date 2020年6月28日 20:22:36
+ * @Description //TODO
+ */
 public class MOQRevise {
 
     private static int times = 1;
@@ -170,6 +170,12 @@ public class MOQRevise {
         return skuTestDatasMap;
     }
 
+    /**
+     * 多次分摊结果
+     * @param needSecondQtyF
+     * @param needCutSkuList
+     * @param skuStoryQuantityMap
+     */
     private static void againCut(Float needSecondQtyF, ArrayList<String> needCutSkuList, Map<String, SkuStoryQuantity> skuStoryQuantityMap) {
 
         times++;

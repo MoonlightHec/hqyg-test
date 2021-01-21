@@ -1,5 +1,7 @@
 package com.sakura;
 
+import org.apache.log4j.Logger;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -10,11 +12,15 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-
 /**
- * Created by River on 2020/7/2
+ * @Author lijun
+ * @Date 2020年7月2日 17:05:01
+ * @Description //TODO
  */
+
 public class RealRequest {
+
+    private static final Logger logger = Logger.getLogger(RealRequest.class);
 
     /**
      * get请求
@@ -25,7 +31,9 @@ public class RealRequest {
             conn = getHttpURLConnection(requestURL, "GET");
             conn.setDoInput(true);
             if (headerMap != null) {
-                setHeader(conn, headerMap);
+                for (String key : headerMap.keySet()) {
+                    conn.setRequestProperty(key, headerMap.get(key));
+                }
             }
             conn.connect();
             return getRealResponse(conn);
@@ -40,14 +48,19 @@ public class RealRequest {
     public RealResponse postData(String requestURL, String body, String bodyType, Map<String, String> headerMap) {
         HttpURLConnection conn = null;
         try {
+            logger.info("请求地址：+" + requestURL);
             conn = getHttpURLConnection(requestURL, "POST");
-            conn.setDoOutput(true);//可写出
-            conn.setDoInput(true);//可读入
+            conn.setDoOutput(true);//可读出
+            conn.setDoInput(true);//可写入
             conn.setUseCaches(false);//不是有缓存
             conn.setRequestProperty("Content-Type", bodyType);
 
             if (headerMap != null) {
-                setHeader(conn, headerMap);//请求头必须放在conn.connect()之前
+                //设置请求头，请求头必须放在conn.connect()之前
+                for (String key : headerMap.keySet()) {
+                    logger.info("请求头信息：" + headerMap.get(key));
+                    conn.setRequestProperty(key, headerMap.get(key));
+                }
             }
             conn.connect();// 连接，以上所有的请求配置必须在这个API调用之前
 
@@ -75,16 +88,6 @@ public class RealRequest {
         return conn;
     }
 
-    /**
-     * 设置请求头
-     */
-    public void setHeader(HttpURLConnection conn, Map<String, String> headerMap) {
-        if (headerMap != null) {
-            for (String key : headerMap.keySet()) {
-                conn.setRequestProperty(key, headerMap.get(key));
-            }
-        }
-    }
 
     /**
      * 当正常返回时，得到Response对象
@@ -136,6 +139,7 @@ public class RealRequest {
         if (params != null) {
             return getPostBodyFormParamsMap(params);
         } else {
+            logger.info(jsonStr);
             return jsonStr;
         }
     }
@@ -156,6 +160,7 @@ public class RealRequest {
                 result.append("=");
                 result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
             }
+            logger.info("请求body：" + result.toString());
             return result.toString();
         } catch (UnsupportedEncodingException e) {
             return null;
@@ -167,8 +172,11 @@ public class RealRequest {
      */
     public static String getPostBodyType(Map<String, String> paramsMap, String jsonStr) {
         if (paramsMap != null) {
-            return "text/plain";
-        } else
+            return "application/x-www-form-urlencoded";
+            //return "text/plain";
+        } else if (jsonStr != null) {
             return "application/json;charset=utf-8";
+        }
+        return null;
     }
 }

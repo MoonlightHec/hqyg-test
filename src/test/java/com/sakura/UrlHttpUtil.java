@@ -1,16 +1,11 @@
 package com.sakura;
 
-import com.hqyg.ifs.SkuStoryQuantity;
-import com.util.ListUtils;
-import org.apache.commons.codec.digest.DigestUtils;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
- * Created by River on 2020/7/2
+ * @Author lijun
+ * @Date 2020年7月2日 17:05:01
+ * @Description //TODO
  */
 
 public class UrlHttpUtil extends RealRequest {
@@ -70,7 +65,7 @@ public class UrlHttpUtil extends RealRequest {
     }
 
     /**
-     * post请求，可以传递参数
+     * post请求，键值对参数，不带请求头
      *
      * @param url：url
      * @param paramsMap：map集合，封装键值对参数
@@ -91,7 +86,7 @@ public class UrlHttpUtil extends RealRequest {
     }
 
     /**
-     * post请求，键值对参数
+     * post请求，json参数,不带请求头
      *
      * @param url：url
      * @param jsonStr：json格式字符串参数
@@ -111,33 +106,4 @@ public class UrlHttpUtil extends RealRequest {
         return urlHttpPost(url, null, jsonStr, headerMap);
     }
 
-
-    /**
-     * 获取签名sign
-     *
-     * @param params    请求头参数map
-     * @param appSecret 签名key
-     * @return sign
-     */
-    public static String sign(Map<String, String> params, String appSecret) {
-
-        Map<String, List<String>> signParams = new HashMap<>();
-
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            signParams.put(entry.getKey(), Arrays.asList(entry.getValue()));
-        }
-        String paramStr = ListUtils.n(signParams.keySet()).order(key -> key).list(key -> {
-            String values = ListUtils.n(signParams.get(key)).order(val -> val).join();
-            return key + values;
-        }).join();
-
-        String signStr = null;
-        if ("wetest".equals(appSecret)) {
-            signStr = appSecret + paramStr;
-        } else if (appSecret.contains("pms")) {
-            signStr = paramStr + appSecret;
-        }
-        String sign = DigestUtils.md5Hex(signStr);
-        return sign;
-    }
 }
